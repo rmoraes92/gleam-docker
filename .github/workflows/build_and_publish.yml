@@ -1,0 +1,39 @@
+name: Building and Publishing Docker Images
+
+on:
+  push:
+    branches:
+      - "main"
+
+jobs:
+  build_and_publish:
+    strategy:
+      fail-fast: false
+      matrix:
+        docker-image-tag: ["1-alpine-3"]
+        os: [ubuntu-22.04]
+    runs-on: ${{ matrix.os }}
+    services:
+      docker:
+        image: docker:20.10.8-dind
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Auth Docker Registry
+        run: |
+          echo $DOCKER_AUTH_PASSWORD | docker login --username $DOCKER_AUTH_USERNAME --password-stdin
+        env:
+          DOCKER_AUTH_USERNAME: ${{ secrets.DOCKER_AUTH_USERNAME }}
+          DOCKER_AUTH_PASSWORD: ${{ secrets.DOCKER_AUTH_PASSWORD }}
+
+      - name: Build Docker Image
+        run: |
+          make build_docker_img docker_img_tag=$docker_image_tag
+        env:
+          docker_image_tag: ${{ matrix.docker-image-tag }}
+
+      - name: Push Docker Image
+        run: |
+          make push_docker_img docker_img_tag=$docker_image_tag
+        env:
+          docker_image_tag: ${{ matrix.docker-image-tag }}
