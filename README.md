@@ -1,5 +1,6 @@
 # gleam-docker
-Docker Image for Gleam Language
+
+Unofficial Docker Image for Gleam Language
 
 ## Registry
 
